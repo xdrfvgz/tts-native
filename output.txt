@@ -1,0 +1,3433 @@
+Ordnerstruktur:
+
+.
+./app
+./app/src
+./app/src/main
+./app/src/main/assets
+./app/src/main/assets/models
+./app/src/main/res
+./app/src/main/res/mipmap-hdpi
+./app/src/main/res/mipmap-xhdpi
+./app/src/main/res/values
+./app/src/main/res/drawable
+./app/src/main/res/mipmap-mdpi
+./app/src/main/res/layout
+./app/src/main/res/mipmap-xxxhdpi
+./app/src/main/res/mipmap-xxhdpi
+./app/src/main/java
+./app/src/main/java/com
+./app/src/main/java/com/example
+./app/src/main/java/com/example/ttsapp
+./gradle
+./gradle/wrapper
+./.GitHub
+./.GitHub/workflows
+./.GitHub/workflow
+-e 
+Dateien:
+./gradlew.bat
+./fix5.py
+./fix.py
+./fix7.py
+./fix6.py
+./settings.gradle
+./fix4.py
+./setup5.py
+./setup.py
+./setup3.py
+./app/src/main/assets/models/tts_model.onnx
+./app/src/main/res/values/strings.xml
+./app/src/main/res/layout/activity_main.xml
+./app/src/main/java/com/example/ttsapp/MainActivity.kt
+./app/src/main/AndroidManifest.xml
+./gradle/wrapper/gradle-wrapper.properties
+./fix11.py
+./setup4.py
+./fix3.py
+./local.properties
+./fix10.py
+./gradle.properties
+./output.txt
+./.GitHub/workflows/ci.yml
+./.GitHub/workflow/ci.yml
+./fix9.py
+./fix2.py
+./fix8.py
+./setup2.py
+./fix12.py
+./build.gradle
+-e 
+Dateiinhalte:
+-e 
+build-info ./gradlew.bat:
+
+@rem
+@rem Copyright 2015 the original author or authors.
+@rem
+@rem Licensed under the Apache License, Version 2.0 (the "License");
+@rem you may not use this file except in compliance with the License.
+@rem You may obtain a copy of the License at
+@rem
+@rem      https://www.apache.org/licenses/LICENSE-2.0
+@rem
+@rem Unless required by applicable law or agreed to in writing, software
+@rem distributed under the License is distributed on an "AS IS" BASIS,
+@rem WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+@rem See the License for the specific language governing permissions and
+@rem limitations under the License.
+@rem
+@rem SPDX-License-Identifier: Apache-2.0
+@rem
+
+@if "%DEBUG%"=="" @echo off
+@rem ##########################################################################
+@rem
+@rem  Gradle startup script for Windows
+@rem
+@rem ##########################################################################
+
+@rem Set local scope for the variables with windows NT shell
+if "%OS%"=="Windows_NT" setlocal
+
+set DIRNAME=%~dp0
+if "%DIRNAME%"=="" set DIRNAME=.
+@rem This is normally unused
+set APP_BASE_NAME=%~n0
+set APP_HOME=%DIRNAME%
+
+@rem Resolve any "." and ".." in APP_HOME to make it shorter.
+for %%i in ("%APP_HOME%") do set APP_HOME=%%~fi
+
+@rem Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
+set DEFAULT_JVM_OPTS="-Xmx64m" "-Xms64m"
+
+@rem Find java.exe
+if defined JAVA_HOME goto findJavaFromJavaHome
+
+set JAVA_EXE=java.exe
+%JAVA_EXE% -version >NUL 2>&1
+if %ERRORLEVEL% equ 0 goto execute
+
+echo. 1>&2
+echo ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH. 1>&2
+echo. 1>&2
+echo Please set the JAVA_HOME variable in your environment to match the 1>&2
+echo location of your Java installation. 1>&2
+
+goto fail
+
+:findJavaFromJavaHome
+set JAVA_HOME=%JAVA_HOME:"=%
+set JAVA_EXE=%JAVA_HOME%/bin/java.exe
+
+if exist "%JAVA_EXE%" goto execute
+
+echo. 1>&2
+echo ERROR: JAVA_HOME is set to an invalid directory: %JAVA_HOME% 1>&2
+echo. 1>&2
+echo Please set the JAVA_HOME variable in your environment to match the 1>&2
+echo location of your Java installation. 1>&2
+
+goto fail
+
+:execute
+@rem Setup the command line
+
+set CLASSPATH=%APP_HOME%\gradle\wrapper\gradle-wrapper.jar
+
+
+@rem Execute Gradle
+"%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %GRADLE_OPTS% "-Dorg.gradle.appname=%APP_BASE_NAME%" -classpath "%CLASSPATH%" org.gradle.wrapper.GradleWrapperMain %*
+
+:end
+@rem End local scope for the variables with windows NT shell
+if %ERRORLEVEL% equ 0 goto mainEnd
+
+:fail
+rem Set variable GRADLE_EXIT_CONSOLE if you need the _script_ return code instead of
+rem the _cmd.exe /c_ return code!
+set EXIT_CODE=%ERRORLEVEL%
+if %EXIT_CODE% equ 0 set EXIT_CODE=1
+if not ""=="%GRADLE_EXIT_CONSOLE%" exit %EXIT_CODE%
+exit /b %EXIT_CODE%
+
+:mainEnd
+if "%OS%"=="Windows_NT" endlocal
+
+:omega
+-e 
+build-info ./fix5.py:
+
+#!/usr/bin/env python3
+
+def create_hybrid_loader():
+    """Erstellt MainActivity mit zwei Lademöglichkeiten"""
+    
+    content = """package com.example.ttsapp
+
+import android.net.Uri
+import android.os.Bundle
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import com.example.ttsapp.databinding.ActivityMainBinding
+import ai.onnxruntime.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
+class MainActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityMainBinding
+    private var ortSession: OrtSession? = null
+    private var isProcessing = false
+
+    private val getContent = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri?.let { loadExternalModel(it) }
+    }
+    
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        
+        setupListeners()
+        tryLoadingBuiltinModel()
+    }
+
+    private fun tryLoadingBuiltinModel() {
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                // Versuche das eingebaute Modell zu laden
+                val modelBytes = assets.open("models/tts_model.onnx").use { it.readBytes() }
+                loadModelFromBytes(modelBytes)
+                
+                withContext(Dispatchers.Main) {
+                    binding.modelStatus.text = "Eingebautes Modell aktiv"
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    binding.modelStatus.text = "Kein eingebautes Modell"
+                }
+            }
+        }
+    }
+
+    private fun loadExternalModel(uri: Uri) {
+        binding.synthesizeButton.isEnabled = false
+        binding.loadModelButton.isEnabled = false
+        binding.progressBar.visibility = android.view.View.VISIBLE
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val modelBytes = contentResolver.openInputStream(uri)?.use { it.readBytes() }
+                    ?: throw Exception("Konnte Modelldatei nicht lesen")
+
+                loadModelFromBytes(modelBytes)
+                
+                withContext(Dispatchers.Main) {
+                    binding.modelStatus.text = "Externes Modell aktiv"
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@MainActivity, 
+                        "Modelladung fehlgeschlagen: ${e.message}", 
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            } finally {
+                withContext(Dispatchers.Main) {
+                    binding.loadModelButton.isEnabled = true
+                    binding.progressBar.visibility = android.view.View.GONE
+                }
+            }
+        }
+    }
+
+    private suspend fun loadModelFromBytes(modelBytes: ByteArray) {
+        val env = OrtEnvironment.getEnvironment()
+        ortSession = env.createSession(modelBytes)
+        
+        withContext(Dispatchers.Main) {
+            binding.synthesizeButton.isEnabled = true
+            Toast.makeText(this@MainActivity, "Model erfolgreich geladen", Toast.LENGTH_SHORT).show()
+        }
+    }
+    
+    private fun setupListeners() {
+        binding.synthesizeButton.isEnabled = false
+        
+        binding.loadModelButton.setOnClickListener {
+            getContent.launch("application/octet-stream")
+        }
+        
+        binding.synthesizeButton.setOnClickListener {
+            if (!isProcessing) {
+                val text = binding.inputText.text?.toString() ?: ""
+                if (text.isNotEmpty()) {
+                    synthesizeText(text)
+                } else {
+                    Toast.makeText(this, "Bitte Text eingeben", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    private fun synthesizeText(text: String) {
+        isProcessing = true
+        binding.progressBar.visibility = android.view.View.VISIBLE
+        binding.synthesizeButton.isEnabled = false
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val session = ortSession ?: throw Exception("Model nicht geladen")
+                
+                val inputArray = arrayOf(text)
+                val env = OrtEnvironment.getEnvironment()
+                val input = OnnxTensor.createTensor(env, inputArray)
+                
+                val output = session.run(mapOf("text" to input))
+                val audioData = output[0].value as Array<*>
+
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@MainActivity, 
+                        "Audio generiert (${audioData.size} samples)", 
+                        Toast_LENGTH_SHORT
+                    ).show()
+                }
+
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@MainActivity, 
+                        "Fehler: ${e.message}", 
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            } finally {
+                withContext(Dispatchers.Main) {
+                    binding.progressBar.visibility = android.view.View.GONE
+                    binding.synthesizeButton.isEnabled = true
+                    isProcessing = false
+                }
+            }
+        }
+    }
+}"""
+
+    # Layout Update
+    layout = """<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/modelStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Kein Modell geladen"
+        android:textStyle="italic"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/textInputLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:hint="Text für Synthese"
+        app:layout_constraintTop_toBottomOf="@id/modelStatus">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/inputText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textMultiLine"
+            android:lines="3" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/loadModelButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Anderes Modell laden"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textInputLayout" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/synthesizeButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Synthesieren"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/loadModelButton" />
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>"""
+
+    # Write files
+    with open("app/src/main/java/com/example/ttsapp/MainActivity.kt", "w") as f:
+        f.write(content)
+    
+    with open("app/src/main/res/layout/activity_main.xml", "w") as f:
+        f.write(layout)
+    
+    print("✅ Hybrid Model Loading implementiert")
+
+if __name__ == "__main__":
+    create_hybrid_loader()
+-e 
+build-info ./fix.py:
+
+#!/usr/bin/env python3
+
+def update_main_activity():
+    """Aktualisiert die MainActivity mit funktionierender TTS-Implementation"""
+    
+    content = """package com.example.ttsapp
+
+import android.os.Bundle
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import com.example.ttsapp.databinding.ActivityMainBinding
+import ai.onnxruntime.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
+import java.nio.FloatBuffer
+
+class MainActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityMainBinding
+    private var ortSession: OrtSession? = null
+    private var isProcessing = false
+    
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        
+        setupListeners()
+    }
+    
+    private fun setupListeners() {
+        binding.synthesizeButton.setOnClickListener {
+            if (!isProcessing) {
+                val text = binding.inputText.text?.toString() ?: ""
+                if (text.isNotEmpty()) {
+                    synthesizeText(text)
+                } else {
+                    Toast.makeText(this, "Bitte Text eingeben", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    private fun synthesizeText(text: String) {
+        isProcessing = true
+        binding.progressBar.visibility = android.view.View.VISIBLE
+        binding.synthesizeButton.isEnabled = false
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                // Initialisiere ONNX Runtime falls nötig
+                if (ortSession == null) {
+                    val modelFile = File(filesDir, "tts_model.onnx")
+                    if (!modelFile.exists()) {
+                        assets.open("models/tts_model.onnx").use { input ->
+                            modelFile.outputStream().use { output ->
+                                input.copyTo(output)
+                            }
+                        }
+                    }
+                    val env = OrtEnvironment.getEnvironment()
+                    ortSession = env.createSession(modelFile.absolutePath)
+                }
+
+                // Text zu Audio verarbeiten
+                val session = ortSession ?: throw Exception("Model nicht geladen")
+                
+                // Beispiel Input Tensor (anpassen an Ihr Modell)
+                val inputTensor = FloatBuffer.allocate(text.length)
+                text.forEachIndexed { index, char ->
+                    inputTensor.put(index, char.toFloat())
+                }
+                
+                val shape = longArrayOf(1, text.length.toLong())
+                val input = OnnxTensor.createTensor(OrtEnvironment.getEnvironment(), inputTensor, shape)
+                
+                val output = session.run(mapOf("input" to input))
+                val audioData = output[0].value as Array<*>
+
+                // UI Update
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@MainActivity, 
+                        "Audio generiert (${audioData.size} samples)", 
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@MainActivity, 
+                        "Fehler: ${e.message}", 
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            } finally {
+                withContext(Dispatchers.Main) {
+                    binding.progressBar.visibility = android.view.View.GONE
+                    binding.synthesizeButton.isEnabled = true
+                    isProcessing = false
+                }
+            }
+        }
+    }
+}"""
+
+    # Stelle sicher, dass der Ordner existiert
+    import os
+    os.makedirs("app/src/main/java/com/example/ttsapp", exist_ok=True)
+    
+    with open("app/src/main/java/com/example/ttsapp/MainActivity.kt", "w") as f:
+        f.write(content)
+    
+    print("✅ MainActivity aktualisiert")
+
+if __name__ == "__main__":
+    update_main_activity()
+-e 
+build-info ./fix7.py:
+
+#!/usr/bin/env python3
+
+def fix_toast():
+    """Korrigiert den Toast LENGTH_SHORT Bezeichner"""
+    
+    with open("app/src/main/java/com/example/ttsapp/MainActivity.kt", "r") as f:
+        content = f.read()
+    
+    # Korrigiere den Tippfehler
+    content = content.replace(
+        "Toast_LENGTH_SHORT",
+        "Toast.LENGTH_SHORT"
+    )
+    
+    with open("app/src/main/java/com/example/ttsapp/MainActivity.kt", "w") as f:
+        f.write(content)
+    
+    print("✅ Toast Konstante korrigiert")
+
+if __name__ == "__main__":
+    fix_toast()
+-e 
+build-info ./fix6.py:
+
+#!/usr/bin/env python3
+
+def update_gradle():
+    """Updated die app/build.gradle um das ONNX Modell einzuschließen"""
+    
+    with open("app/build.gradle", "r") as f:
+        content = f.read()
+    
+    # Füge android.sourceSets Block hinzu/modifiziere ihn
+    if "sourceSets {" not in content:
+        content = content.replace(
+            "android {",
+            """android {
+    sourceSets {
+        main {
+            assets.srcDirs = ['src/main/assets']
+        }
+    }""")
+    
+    with open("app/build.gradle", "w") as f:
+        f.write(content)
+
+    print("✅ Gradle für Asset-Inclusion aktualisiert")
+    print("ℹ️  Kopiere jetzt dein Modell nach app/src/main/assets/models/tts_model.onnx")
+
+if __name__ == "__main__":
+    update_gradle()
+-e 
+build-info ./settings.gradle:
+
+include ':app'
+rootProject.name = "TtsApp"
+-e 
+build-info ./fix4.py:
+
+#!/usr/bin/env python3
+
+def update_gradle():
+    """Updated die app/build.gradle um assets auszuschließen"""
+    
+    with open("app/build.gradle", "r") as f:
+        content = f.read()
+    
+    # Füge android.sourceSets Block hinzu um assets auszuschließen
+    if "android {" in content:
+        content = content.replace(
+            "android {",
+            """android {
+    sourceSets {
+        main {
+            assets.srcDirs = [] // Keine Assets kompilieren
+        }
+    }""")
+    
+    with open("app/build.gradle", "w") as f:
+        f.write(content)
+    
+    print("✅ Assets ausgeschlossen")
+
+if __name__ == "__main__":
+    update_gradle()
+-e 
+build-info ./setup5.py:
+
+#!/usr/bin/env python3
+
+def update_dependencies():
+    """Updated die Dependencies in app/build.gradle"""
+    
+    with open("app/build.gradle", "r") as f:
+        content = f.read()
+    
+    # Suche die dependencies-Section und füge die neue Dependency hinzu
+    if "dependencies {" in content:
+        content = content.replace(
+            "dependencies {",
+            """dependencies {
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.6.1'"""
+        )
+    
+    with open("app/build.gradle", "w") as f:
+        f.write(content)
+    
+    print("✅ Lifecycle Dependency hinzugefügt")
+
+if __name__ == "__main__":
+    update_dependencies()
+-e 
+build-info ./setup.py:
+
+#!/usr/bin/env python3
+import os
+import shutil
+from pathlib import Path
+import subprocess
+
+def create_project_structure():
+    """Erstellt die komplette Projektstruktur für eine Android App"""
+    
+    # Basis-Projektstruktur
+    project_name = "TtsApp"
+    base_package = "com.example.ttsapp"
+    package_path = base_package.replace(".", "/")
+    
+    # Hauptverzeichnisse
+    dirs = [
+        "app/src/main/java/" + package_path,
+        "app/src/main/res/layout",
+        "app/src/main/res/values",
+        "app/src/main/res/drawable",
+        "app/src/main/assets/models",
+        "gradle/wrapper"
+    ]
+    
+    # Erstelle alle Verzeichnisse
+    for dir_path in dirs:
+        Path(dir_path).mkdir(parents=True, exist_ok=True)
+    
+    # build.gradle (Project Level)
+    with open("build.gradle", "w") as f:
+        f.write("""buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:7.4.2'
+        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.22'
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}""")
+
+    # build.gradle (App Level)
+    with open("app/build.gradle", "w") as f:
+        f.write("""plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+}
+
+android {
+    namespace 'com.example.ttsapp'
+    compileSdk 33
+
+    defaultConfig {
+        applicationId "com.example.ttsapp"
+        minSdk 21
+        targetSdk 33
+        versionCode 1
+        versionName "1.0"
+
+        ndk {
+            abiFilters 'armeabi-v7a', 'arm64-v8a'
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    buildFeatures {
+        viewBinding true
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+}
+
+dependencies {
+    implementation 'androidx.core:core-ktx:1.10.1'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.9.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'com.microsoft.onnxruntime:onnxruntime-android:1.15.1'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1'
+}""")
+
+    # settings.gradle
+    with open("settings.gradle", "w") as f:
+        f.write("""include ':app'
+rootProject.name = "TtsApp"
+""")
+
+    # local.properties
+    android_sdk = os.getenv("ANDROID_HOME", "/path/to/your/android/sdk")
+    with open("local.properties", "w") as f:
+        f.write(f"sdk.dir={android_sdk}")
+
+    # MainActivity.kt
+    with open(f"app/src/main/java/{package_path}/MainActivity.kt", "w") as f:
+        f.write("""package com.example.ttsapp
+
+import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import com.example.ttsapp.databinding.ActivityMainBinding
+import ai.onnxruntime.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.io.File
+
+class MainActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityMainBinding
+    private var ortSession: OrtSession? = null
+    
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        
+        setupOnnxRuntime()
+        setupUI()
+    }
+    
+    private fun setupOnnxRuntime() {
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val modelFile = File(filesDir, "tts_model.onnx")
+                assets.open("models/tts_model.onnx").use { input ->
+                    modelFile.outputStream().use { output ->
+                        input.copyTo(output)
+                    }
+                }
+                
+                val env = OrtEnvironment.getEnvironment()
+                ortSession = env.createSession(modelFile.absolutePath)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+    
+    private fun setupUI() {
+        binding.synthesizeButton.setOnClickListener {
+            // Hier kommt Ihre TTS-Logik hin
+        }
+    }
+}""")
+
+    # activity_main.xml
+    with open("app/src/main/res/layout/activity_main.xml", "w") as f:
+        f.write("""<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/textInputLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Text für Synthese"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/inputText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textMultiLine"
+            android:lines="3" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/synthesizeButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Synthesieren"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textInputLayout" />
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>""")
+
+    # AndroidManifest.xml
+    with open("app/src/main/AndroidManifest.xml", "w") as f:
+        f.write("""<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.MaterialComponents.DayNight.DarkActionBar">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>""")
+
+    # strings.xml
+    with open("app/src/main/res/values/strings.xml", "w") as f:
+        f.write("""<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TTS App</string>
+</resources>""")
+
+    # Gradle Wrapper Properties
+    with open("gradle/wrapper/gradle-wrapper.properties", "w") as f:
+        f.write("""distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+distributionUrl=https\://services.gradle.org/distributions/gradle-7.6.1-bin.zip
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists""")
+
+def main():
+    """Hauptfunktion zum Erstellen des Projekts"""
+    print("🚀 Erstelle Android-Projekt...")
+    create_project_structure()
+    print("✅ Projekt-Struktur erstellt!")
+    
+    print("\n📝 Folgende Schritte sind noch notwendig:")
+    print("1. Kopieren Sie Ihr ONNX-Modell nach app/src/main/assets/models/tts_model.onnx")
+    print("2. Setzen Sie den korrekten SDK-Pfad in local.properties")
+    print("3. Führen Sie ./gradlew build aus, um das Projekt zu kompilieren")
+    print("\n🎉 Fertig! Das Projekt ist nun bereit für die Entwicklung!")
+
+if __name__ == "__main__":
+    main()
+-e 
+build-info ./setup3.py:
+
+#!/usr/bin/env python3
+
+def quick_fix():
+    """Fixe die AndroidX Probleme mit minimalen Änderungen"""
+    
+    # Erstelle gradle.properties falls nicht vorhanden
+    with open("gradle.properties", "w") as f:
+        f.write("android.useAndroidX=true\nandroid.enableJetifier=true")
+    
+    print("✅ Fixes angewendet - führen Sie nun ./gradlew build aus")
+
+if __name__ == "__main__":
+    quick_fix()
+-e 
+build-info ./app/src/main/res/values/strings.xml:
+
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TTS App</string>
+</resources>-e 
+build-info ./app/src/main/res/layout/activity_main.xml:
+
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/modelStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Kein Modell geladen"
+        android:textStyle="italic"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/textInputLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:hint="Text für Synthese"
+        app:layout_constraintTop_toBottomOf="@id/modelStatus">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/inputText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textMultiLine"
+            android:lines="3" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/loadModelButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Anderes Modell laden"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textInputLayout" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/synthesizeButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Synthesieren"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/loadModelButton" />
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>-e 
+build-info ./app/src/main/java/com/example/ttsapp/MainActivity.kt:
+
+package com.example.ttsapp
+
+import android.os.Bundle
+import android.view.View
+import androidx.appcompat.app.AppCompatActivity
+import com.example.ttsapp.databinding.ActivityMainBinding
+
+class MainActivity : AppCompatActivity() {
+    private var _binding: ActivityMainBinding? = null
+    private val binding get() = _binding!!
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        _binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        
+        // Minimale UI Initialisierung
+        binding.synthesizeButton.isEnabled = false
+        binding.progressBar.visibility = View.GONE
+        binding.modelStatus.text = "Kein Modell geladen"
+        
+        // Einfacher Click Listener
+        binding.loadModelButton.setOnClickListener {
+            binding.modelStatus.text = "Button wurde geklickt"
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        _binding = null
+    }
+}
+-e 
+build-info ./app/src/main/AndroidManifest.xml:
+
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.MaterialComponents.DayNight.DarkActionBar">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>-e 
+build-info ./gradle/wrapper/gradle-wrapper.properties:
+
+distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+distributionUrl=https\://services.gradle.org/distributions/gradle-8.10.2-bin.zip
+networkTimeout=10000
+validateDistributionUrl=true
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+-e 
+build-info ./fix11.py:
+
+#!/usr/bin/env python3
+
+def fix_loader():
+    """Korrigiert den loadExternalModel Call"""
+    
+    with open("app/src/main/java/com/example/ttsapp/MainActivity.kt", "r") as f:
+        content = f.read()
+
+    # Ersetze die problematische Methode
+    content = content.replace(
+        """    private fun loadExternalModel(uri: Uri) {
+        updateUIState(isLoading = true)
+
+        lifecycleScope.launch(Dispatchers.IO) {""",
+        """    private fun loadExternalModel(uri: Uri) {
+        lifecycleScope.launch(Dispatchers.IO) {
+            updateUIState(isLoading = true)""")
+
+    with open("app/src/main/java/com/example/ttsapp/MainActivity.kt", "w") as f:
+        f.write(content)
+
+    print("✅ Loader-Methode korrigiert")
+
+if __name__ == "__main__":
+    fix_loader()
+-e 
+build-info ./setup4.py:
+
+#!/usr/bin/env python3
+import os
+
+def create_icons():
+    """Erstellt einfache App-Icons"""
+    
+    # Verzeichnisse erstellen
+    for dpi in ['mdpi', 'hdpi', 'xhdpi', 'xxhdpi', 'xxxhdpi']:
+        path = f"app/src/main/res/mipmap-{dpi}"
+        os.makedirs(path, exist_ok=True)
+        
+        # Platzhalter-Icon erstellen
+        for icon_name in ['ic_launcher', 'ic_launcher_round']:
+            with open(f"{path}/{icon_name}.png", "wb") as f:
+                # Ein 1x1 transparentes PNG
+                f.write(b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15\xc4\x89\x00\x00\x00\x0bIDAT\x08\xd7c\x60\x60\x00\x00\x00\x02\x00\x01\xe5\x27\xde\xfc\x00\x00\x00\x00IEND\xaeB`\x82')
+
+    print("✅ Icons erstellt")
+
+if __name__ == "__main__":
+    create_icons()
+-e 
+build-info ./fix3.py:
+
+#!/usr/bin/env python3
+
+def create_file_chooser():
+    content = """package com.example.ttsapp
+
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Bundle
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
+import com.example.ttsapp.databinding.ActivityMainBinding
+import ai.onnxruntime.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
+class MainActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityMainBinding
+    private var ortSession: OrtSession? = null
+    private var isProcessing = false
+
+    private val getContent = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri?.let { loadModel(it) }
+    }
+    
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        
+        setupListeners()
+        checkPermission()
+    }
+
+    private fun checkPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+            != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
+                1)
+        }
+    }
+
+    private fun loadModel(uri: Uri) {
+        binding.synthesizeButton.isEnabled = false
+        binding.loadModelButton.isEnabled = false
+        binding.progressBar.visibility = android.view.View.VISIBLE
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val modelBytes = contentResolver.openInputStream(uri)?.use { it.readBytes() }
+                    ?: throw Exception("Konnte Modelldatei nicht lesen")
+
+                val env = OrtEnvironment.getEnvironment()
+                ortSession = env.createSession(modelBytes)
+
+                withContext(Dispatchers.Main) {
+                    binding.synthesizeButton.isEnabled = true
+                    binding.loadModelButton.isEnabled = true
+                    binding.progressBar.visibility = android.view.View.GONE
+                    Toast.makeText(this@MainActivity, "Model erfolgreich geladen", Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    binding.loadModelButton.isEnabled = true
+                    binding.progressBar.visibility = android.view.View.GONE
+                    Toast.makeText(this@MainActivity, 
+                        "Modelladung fehlgeschlagen: ${e.message}", 
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+        }
+    }
+    
+    private fun setupListeners() {
+        binding.synthesizeButton.isEnabled = false
+        
+        binding.loadModelButton.setOnClickListener {
+            getContent.launch("application/octet-stream")
+        }
+        
+        binding.synthesizeButton.setOnClickListener {
+            if (!isProcessing) {
+                val text = binding.inputText.text?.toString() ?: ""
+                if (text.isNotEmpty()) {
+                    synthesizeText(text)
+                } else {
+                    Toast.makeText(this, "Bitte Text eingeben", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    private fun synthesizeText(text: String) {
+        isProcessing = true
+        binding.progressBar.visibility = android.view.View.VISIBLE
+        binding.synthesizeButton.isEnabled = false
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val session = ortSession ?: throw Exception("Model nicht geladen")
+                
+                val inputArray = arrayOf(text)
+                val env = OrtEnvironment.getEnvironment()
+                val input = OnnxTensor.createTensor(env, inputArray)
+                
+                val output = session.run(mapOf("text" to input))
+                val audioData = output[0].value as Array<*>
+
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@MainActivity, 
+                        "Audio generiert (${audioData.size} samples)", 
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@MainActivity, 
+                        "Fehler: ${e.message}", 
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            } finally {
+                withContext(Dispatchers.Main) {
+                    binding.progressBar.visibility = android.view.View.GONE
+                    binding.synthesizeButton.isEnabled = true
+                    isProcessing = false
+                }
+            }
+        }
+    }
+}"""
+
+    # Layout Update
+    layout = """<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/textInputLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Text für Synthese"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/inputText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textMultiLine"
+            android:lines="3" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/loadModelButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Modell laden"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textInputLayout" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/synthesizeButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Synthesieren"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/loadModelButton" />
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>"""
+
+    # Update AndroidManifest to include storage permission
+    manifest = """<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.MaterialComponents.DayNight.DarkActionBar">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>"""
+
+    # Write files
+    with open("app/src/main/java/com/example/ttsapp/MainActivity.kt", "w") as f:
+        f.write(content)
+    
+    with open("app/src/main/res/layout/activity_main.xml", "w") as f:
+        f.write(layout)
+        
+    with open("app/src/main/AndroidManifest.xml", "w") as f:
+        f.write(manifest)
+    
+    print("✅ File Chooser Implementation hinzugefügt")
+
+if __name__ == "__main__":
+    create_file_chooser()
+-e 
+build-info ./local.properties:
+
+sdk.dir=/path/to/your/android/sdk-e 
+build-info ./fix10.py:
+
+#!/usr/bin/env python3
+
+def fix_main_activity():
+    """Korrigiert die Fehler in der MainActivity.kt"""
+    
+    with open("app/src/main/java/com/example/ttsapp/MainActivity.kt", "r") as f:
+        content = f.read()
+
+    # 1. BUFFER_SIZE aus companion object raus
+    content = content.replace(
+        """companion object {
+        private const val SAMPLE_RATE = 22050 // Standard TTS sample rate
+        private const val PERMISSION_REQUEST_CODE = 1001
+        private const val BUFFER_SIZE = AudioTrack.getMinBufferSize(
+            SAMPLE_RATE,
+            AudioFormat.CHANNEL_OUT_MONO,
+            AudioFormat.ENCODING_PCM_FLOAT
+        )
+    }""",
+        """companion object {
+        private const val SAMPLE_RATE = 22050 // Standard TTS sample rate
+        private const val PERMISSION_REQUEST_CODE = 1001
+    }
+
+    private val BUFFER_SIZE = AudioTrack.getMinBufferSize(
+        SAMPLE_RATE,
+        AudioFormat.CHANNEL_OUT_MONO,
+        AudioFormat.ENCODING_PCM_FLOAT
+    )""")
+
+    # 2. setupListeners Coroutine Fix
+    content = content.replace(
+        """binding.synthesizeButton.setOnClickListener {
+            if (!isProcessing) {
+                val text = binding.inputText.text?.toString() ?: ""
+                if (text.isNotEmpty()) {
+                    synthesizeText(text)
+                } else {
+                    showToast("Bitte Text eingeben")
+                }
+            }
+        }""",
+        """binding.synthesizeButton.setOnClickListener {
+            if (!isProcessing) {
+                val text = binding.inputText.text?.toString() ?: ""
+                if (text.isNotEmpty()) {
+                    synthesizeText(text)
+                } else {
+                    lifecycleScope.launch {
+                        showToast("Bitte Text eingeben")
+                    }
+                }
+            }
+        }""")
+
+    with open("app/src/main/java/com/example/ttsapp/MainActivity.kt", "w") as f:
+        f.write(content)
+
+    print("✅ MainActivity.kt Fehler behoben")
+
+if __name__ == "__main__":
+    fix_main_activity()
+-e 
+build-info ./gradle.properties:
+
+android.useAndroidX=true
+android.enableJetifier=true-e 
+build-info ./output.txt:
+
+Ordnerstruktur:
+
+.
+./app
+./app/src
+./app/src/main
+./app/src/main/assets
+./app/src/main/assets/models
+./app/src/main/res
+./app/src/main/res/mipmap-hdpi
+./app/src/main/res/mipmap-xhdpi
+./app/src/main/res/values
+./app/src/main/res/drawable
+./app/src/main/res/mipmap-mdpi
+./app/src/main/res/layout
+./app/src/main/res/mipmap-xxxhdpi
+./app/src/main/res/mipmap-xxhdpi
+./app/src/main/java
+./app/src/main/java/com
+./app/src/main/java/com/example
+./app/src/main/java/com/example/ttsapp
+./gradle
+./gradle/wrapper
+./.GitHub
+./.GitHub/workflows
+./.GitHub/workflow
+-e 
+Dateien:
+./gradlew.bat
+./fix5.py
+./fix.py
+./fix7.py
+./fix6.py
+./settings.gradle
+./fix4.py
+./setup5.py
+./setup.py
+./setup3.py
+./app/src/main/assets/models/tts_model.onnx
+./app/src/main/res/values/strings.xml
+./app/src/main/res/layout/activity_main.xml
+./app/src/main/java/com/example/ttsapp/MainActivity.kt
+./app/src/main/AndroidManifest.xml
+./gradle/wrapper/gradle-wrapper.properties
+./fix11.py
+./setup4.py
+./fix3.py
+./local.properties
+./fix10.py
+./gradle.properties
+./output.txt
+./.GitHub/workflows/ci.yml
+./.GitHub/workflow/ci.yml
+./fix9.py
+./fix2.py
+./fix8.py
+./setup2.py
+./fix12.py
+./build.gradle
+-e 
+Dateiinhalte:
+-e 
+build-info ./gradlew.bat:
+
+@rem
+@rem Copyright 2015 the original author or authors.
+@rem
+@rem Licensed under the Apache License, Version 2.0 (the "License");
+@rem you may not use this file except in compliance with the License.
+@rem You may obtain a copy of the License at
+@rem
+@rem      https://www.apache.org/licenses/LICENSE-2.0
+@rem
+@rem Unless required by applicable law or agreed to in writing, software
+@rem distributed under the License is distributed on an "AS IS" BASIS,
+@rem WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+@rem See the License for the specific language governing permissions and
+@rem limitations under the License.
+@rem
+@rem SPDX-License-Identifier: Apache-2.0
+@rem
+
+@if "%DEBUG%"=="" @echo off
+@rem ##########################################################################
+@rem
+@rem  Gradle startup script for Windows
+@rem
+@rem ##########################################################################
+
+@rem Set local scope for the variables with windows NT shell
+if "%OS%"=="Windows_NT" setlocal
+
+set DIRNAME=%~dp0
+if "%DIRNAME%"=="" set DIRNAME=.
+@rem This is normally unused
+set APP_BASE_NAME=%~n0
+set APP_HOME=%DIRNAME%
+
+@rem Resolve any "." and ".." in APP_HOME to make it shorter.
+for %%i in ("%APP_HOME%") do set APP_HOME=%%~fi
+
+@rem Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
+set DEFAULT_JVM_OPTS="-Xmx64m" "-Xms64m"
+
+@rem Find java.exe
+if defined JAVA_HOME goto findJavaFromJavaHome
+
+set JAVA_EXE=java.exe
+%JAVA_EXE% -version >NUL 2>&1
+if %ERRORLEVEL% equ 0 goto execute
+
+echo. 1>&2
+echo ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH. 1>&2
+echo. 1>&2
+echo Please set the JAVA_HOME variable in your environment to match the 1>&2
+echo location of your Java installation. 1>&2
+
+goto fail
+
+:findJavaFromJavaHome
+set JAVA_HOME=%JAVA_HOME:"=%
+set JAVA_EXE=%JAVA_HOME%/bin/java.exe
+
+if exist "%JAVA_EXE%" goto execute
+
+echo. 1>&2
+echo ERROR: JAVA_HOME is set to an invalid directory: %JAVA_HOME% 1>&2
+echo. 1>&2
+echo Please set the JAVA_HOME variable in your environment to match the 1>&2
+echo location of your Java installation. 1>&2
+
+goto fail
+
+:execute
+@rem Setup the command line
+
+set CLASSPATH=%APP_HOME%\gradle\wrapper\gradle-wrapper.jar
+
+
+@rem Execute Gradle
+"%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %GRADLE_OPTS% "-Dorg.gradle.appname=%APP_BASE_NAME%" -classpath "%CLASSPATH%" org.gradle.wrapper.GradleWrapperMain %*
+
+:end
+@rem End local scope for the variables with windows NT shell
+if %ERRORLEVEL% equ 0 goto mainEnd
+
+:fail
+rem Set variable GRADLE_EXIT_CONSOLE if you need the _script_ return code instead of
+rem the _cmd.exe /c_ return code!
+set EXIT_CODE=%ERRORLEVEL%
+if %EXIT_CODE% equ 0 set EXIT_CODE=1
+if not ""=="%GRADLE_EXIT_CONSOLE%" exit %EXIT_CODE%
+exit /b %EXIT_CODE%
+
+:mainEnd
+if "%OS%"=="Windows_NT" endlocal
+
+:omega
+-e 
+build-info ./fix5.py:
+
+#!/usr/bin/env python3
+
+def create_hybrid_loader():
+    """Erstellt MainActivity mit zwei Lademöglichkeiten"""
+    
+    content = """package com.example.ttsapp
+
+import android.net.Uri
+import android.os.Bundle
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import com.example.ttsapp.databinding.ActivityMainBinding
+import ai.onnxruntime.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
+class MainActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityMainBinding
+    private var ortSession: OrtSession? = null
+    private var isProcessing = false
+
+    private val getContent = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri?.let { loadExternalModel(it) }
+    }
+    
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        
+        setupListeners()
+        tryLoadingBuiltinModel()
+    }
+
+    private fun tryLoadingBuiltinModel() {
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                // Versuche das eingebaute Modell zu laden
+                val modelBytes = assets.open("models/tts_model.onnx").use { it.readBytes() }
+                loadModelFromBytes(modelBytes)
+                
+                withContext(Dispatchers.Main) {
+                    binding.modelStatus.text = "Eingebautes Modell aktiv"
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    binding.modelStatus.text = "Kein eingebautes Modell"
+                }
+            }
+        }
+    }
+
+    private fun loadExternalModel(uri: Uri) {
+        binding.synthesizeButton.isEnabled = false
+        binding.loadModelButton.isEnabled = false
+        binding.progressBar.visibility = android.view.View.VISIBLE
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val modelBytes = contentResolver.openInputStream(uri)?.use { it.readBytes() }
+                    ?: throw Exception("Konnte Modelldatei nicht lesen")
+
+                loadModelFromBytes(modelBytes)
+                
+                withContext(Dispatchers.Main) {
+                    binding.modelStatus.text = "Externes Modell aktiv"
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@MainActivity, 
+                        "Modelladung fehlgeschlagen: ${e.message}", 
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            } finally {
+                withContext(Dispatchers.Main) {
+                    binding.loadModelButton.isEnabled = true
+                    binding.progressBar.visibility = android.view.View.GONE
+                }
+            }
+        }
+    }
+
+    private suspend fun loadModelFromBytes(modelBytes: ByteArray) {
+        val env = OrtEnvironment.getEnvironment()
+        ortSession = env.createSession(modelBytes)
+        
+        withContext(Dispatchers.Main) {
+            binding.synthesizeButton.isEnabled = true
+            Toast.makeText(this@MainActivity, "Model erfolgreich geladen", Toast.LENGTH_SHORT).show()
+        }
+    }
+    
+    private fun setupListeners() {
+        binding.synthesizeButton.isEnabled = false
+        
+        binding.loadModelButton.setOnClickListener {
+            getContent.launch("application/octet-stream")
+        }
+        
+        binding.synthesizeButton.setOnClickListener {
+            if (!isProcessing) {
+                val text = binding.inputText.text?.toString() ?: ""
+                if (text.isNotEmpty()) {
+                    synthesizeText(text)
+                } else {
+                    Toast.makeText(this, "Bitte Text eingeben", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    private fun synthesizeText(text: String) {
+        isProcessing = true
+        binding.progressBar.visibility = android.view.View.VISIBLE
+        binding.synthesizeButton.isEnabled = false
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val session = ortSession ?: throw Exception("Model nicht geladen")
+                
+                val inputArray = arrayOf(text)
+                val env = OrtEnvironment.getEnvironment()
+                val input = OnnxTensor.createTensor(env, inputArray)
+                
+                val output = session.run(mapOf("text" to input))
+                val audioData = output[0].value as Array<*>
+
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@MainActivity, 
+                        "Audio generiert (${audioData.size} samples)", 
+                        Toast_LENGTH_SHORT
+                    ).show()
+                }
+
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@MainActivity, 
+                        "Fehler: ${e.message}", 
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            } finally {
+                withContext(Dispatchers.Main) {
+                    binding.progressBar.visibility = android.view.View.GONE
+                    binding.synthesizeButton.isEnabled = true
+                    isProcessing = false
+                }
+            }
+        }
+    }
+}"""
+
+    # Layout Update
+    layout = """<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/modelStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Kein Modell geladen"
+        android:textStyle="italic"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/textInputLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:hint="Text für Synthese"
+        app:layout_constraintTop_toBottomOf="@id/modelStatus">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/inputText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textMultiLine"
+            android:lines="3" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/loadModelButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Anderes Modell laden"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textInputLayout" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/synthesizeButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Synthesieren"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/loadModelButton" />
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>"""
+
+    # Write files
+    with open("app/src/main/java/com/example/ttsapp/MainActivity.kt", "w") as f:
+        f.write(content)
+    
+    with open("app/src/main/res/layout/activity_main.xml", "w") as f:
+        f.write(layout)
+    
+    print("✅ Hybrid Model Loading implementiert")
+
+if __name__ == "__main__":
+    create_hybrid_loader()
+-e 
+build-info ./fix.py:
+
+#!/usr/bin/env python3
+
+def update_main_activity():
+    """Aktualisiert die MainActivity mit funktionierender TTS-Implementation"""
+    
+    content = """package com.example.ttsapp
+
+import android.os.Bundle
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import com.example.ttsapp.databinding.ActivityMainBinding
+import ai.onnxruntime.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
+import java.nio.FloatBuffer
+
+class MainActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityMainBinding
+    private var ortSession: OrtSession? = null
+    private var isProcessing = false
+    
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        
+        setupListeners()
+    }
+    
+    private fun setupListeners() {
+        binding.synthesizeButton.setOnClickListener {
+            if (!isProcessing) {
+                val text = binding.inputText.text?.toString() ?: ""
+                if (text.isNotEmpty()) {
+                    synthesizeText(text)
+                } else {
+                    Toast.makeText(this, "Bitte Text eingeben", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    private fun synthesizeText(text: String) {
+        isProcessing = true
+        binding.progressBar.visibility = android.view.View.VISIBLE
+        binding.synthesizeButton.isEnabled = false
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                // Initialisiere ONNX Runtime falls nötig
+                if (ortSession == null) {
+                    val modelFile = File(filesDir, "tts_model.onnx")
+                    if (!modelFile.exists()) {
+                        assets.open("models/tts_model.onnx").use { input ->
+                            modelFile.outputStream().use { output ->
+                                input.copyTo(output)
+                            }
+                        }
+                    }
+                    val env = OrtEnvironment.getEnvironment()
+                    ortSession = env.createSession(modelFile.absolutePath)
+                }
+
+                // Text zu Audio verarbeiten
+                val session = ortSession ?: throw Exception("Model nicht geladen")
+                
+                // Beispiel Input Tensor (anpassen an Ihr Modell)
+                val inputTensor = FloatBuffer.allocate(text.length)
+                text.forEachIndexed { index, char ->
+                    inputTensor.put(index, char.toFloat())
+                }
+                
+                val shape = longArrayOf(1, text.length.toLong())
+                val input = OnnxTensor.createTensor(OrtEnvironment.getEnvironment(), inputTensor, shape)
+                
+                val output = session.run(mapOf("input" to input))
+                val audioData = output[0].value as Array<*>
+
+                // UI Update
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@MainActivity, 
+                        "Audio generiert (${audioData.size} samples)", 
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@MainActivity, 
+                        "Fehler: ${e.message}", 
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            } finally {
+                withContext(Dispatchers.Main) {
+                    binding.progressBar.visibility = android.view.View.GONE
+                    binding.synthesizeButton.isEnabled = true
+                    isProcessing = false
+                }
+            }
+        }
+    }
+}"""
+
+    # Stelle sicher, dass der Ordner existiert
+    import os
+    os.makedirs("app/src/main/java/com/example/ttsapp", exist_ok=True)
+    
+    with open("app/src/main/java/com/example/ttsapp/MainActivity.kt", "w") as f:
+        f.write(content)
+    
+    print("✅ MainActivity aktualisiert")
+
+if __name__ == "__main__":
+    update_main_activity()
+-e 
+build-info ./fix7.py:
+
+#!/usr/bin/env python3
+
+def fix_toast():
+    """Korrigiert den Toast LENGTH_SHORT Bezeichner"""
+    
+    with open("app/src/main/java/com/example/ttsapp/MainActivity.kt", "r") as f:
+        content = f.read()
+    
+    # Korrigiere den Tippfehler
+    content = content.replace(
+        "Toast_LENGTH_SHORT",
+        "Toast.LENGTH_SHORT"
+    )
+    
+    with open("app/src/main/java/com/example/ttsapp/MainActivity.kt", "w") as f:
+        f.write(content)
+    
+    print("✅ Toast Konstante korrigiert")
+
+if __name__ == "__main__":
+    fix_toast()
+-e 
+build-info ./fix6.py:
+
+#!/usr/bin/env python3
+
+def update_gradle():
+    """Updated die app/build.gradle um das ONNX Modell einzuschließen"""
+    
+    with open("app/build.gradle", "r") as f:
+        content = f.read()
+    
+    # Füge android.sourceSets Block hinzu/modifiziere ihn
+    if "sourceSets {" not in content:
+        content = content.replace(
+            "android {",
+            """android {
+    sourceSets {
+        main {
+            assets.srcDirs = ['src/main/assets']
+        }
+    }""")
+    
+    with open("app/build.gradle", "w") as f:
+        f.write(content)
+
+    print("✅ Gradle für Asset-Inclusion aktualisiert")
+    print("ℹ️  Kopiere jetzt dein Modell nach app/src/main/assets/models/tts_model.onnx")
+
+if __name__ == "__main__":
+    update_gradle()
+-e 
+build-info ./settings.gradle:
+
+include ':app'
+rootProject.name = "TtsApp"
+-e 
+build-info ./fix4.py:
+
+#!/usr/bin/env python3
+
+def update_gradle():
+    """Updated die app/build.gradle um assets auszuschließen"""
+    
+    with open("app/build.gradle", "r") as f:
+        content = f.read()
+    
+    # Füge android.sourceSets Block hinzu um assets auszuschließen
+    if "android {" in content:
+        content = content.replace(
+            "android {",
+            """android {
+    sourceSets {
+        main {
+            assets.srcDirs = [] // Keine Assets kompilieren
+        }
+    }""")
+    
+    with open("app/build.gradle", "w") as f:
+        f.write(content)
+    
+    print("✅ Assets ausgeschlossen")
+
+if __name__ == "__main__":
+    update_gradle()
+-e 
+build-info ./setup5.py:
+
+#!/usr/bin/env python3
+
+def update_dependencies():
+    """Updated die Dependencies in app/build.gradle"""
+    
+    with open("app/build.gradle", "r") as f:
+        content = f.read()
+    
+    # Suche die dependencies-Section und füge die neue Dependency hinzu
+    if "dependencies {" in content:
+        content = content.replace(
+            "dependencies {",
+            """dependencies {
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.6.1'"""
+        )
+    
+    with open("app/build.gradle", "w") as f:
+        f.write(content)
+    
+    print("✅ Lifecycle Dependency hinzugefügt")
+
+if __name__ == "__main__":
+    update_dependencies()
+-e 
+build-info ./setup.py:
+
+#!/usr/bin/env python3
+import os
+import shutil
+from pathlib import Path
+import subprocess
+
+def create_project_structure():
+    """Erstellt die komplette Projektstruktur für eine Android App"""
+    
+    # Basis-Projektstruktur
+    project_name = "TtsApp"
+    base_package = "com.example.ttsapp"
+    package_path = base_package.replace(".", "/")
+    
+    # Hauptverzeichnisse
+    dirs = [
+        "app/src/main/java/" + package_path,
+        "app/src/main/res/layout",
+        "app/src/main/res/values",
+        "app/src/main/res/drawable",
+        "app/src/main/assets/models",
+        "gradle/wrapper"
+    ]
+    
+    # Erstelle alle Verzeichnisse
+    for dir_path in dirs:
+        Path(dir_path).mkdir(parents=True, exist_ok=True)
+    
+    # build.gradle (Project Level)
+    with open("build.gradle", "w") as f:
+        f.write("""buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:7.4.2'
+        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.22'
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}""")
+
+    # build.gradle (App Level)
+    with open("app/build.gradle", "w") as f:
+        f.write("""plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+}
+
+android {
+    namespace 'com.example.ttsapp'
+    compileSdk 33
+
+    defaultConfig {
+        applicationId "com.example.ttsapp"
+        minSdk 21
+        targetSdk 33
+        versionCode 1
+        versionName "1.0"
+
+        ndk {
+            abiFilters 'armeabi-v7a', 'arm64-v8a'
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    buildFeatures {
+        viewBinding true
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+}
+
+dependencies {
+    implementation 'androidx.core:core-ktx:1.10.1'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.9.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'com.microsoft.onnxruntime:onnxruntime-android:1.15.1'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1'
+}""")
+
+    # settings.gradle
+    with open("settings.gradle", "w") as f:
+        f.write("""include ':app'
+rootProject.name = "TtsApp"
+""")
+
+    # local.properties
+    android_sdk = os.getenv("ANDROID_HOME", "/path/to/your/android/sdk")
+    with open("local.properties", "w") as f:
+        f.write(f"sdk.dir={android_sdk}")
+
+    # MainActivity.kt
+    with open(f"app/src/main/java/{package_path}/MainActivity.kt", "w") as f:
+        f.write("""package com.example.ttsapp
+
+import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import com.example.ttsapp.databinding.ActivityMainBinding
+import ai.onnxruntime.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.io.File
+
+class MainActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityMainBinding
+    private var ortSession: OrtSession? = null
+    
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        
+        setupOnnxRuntime()
+        setupUI()
+    }
+    
+    private fun setupOnnxRuntime() {
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val modelFile = File(filesDir, "tts_model.onnx")
+                assets.open("models/tts_model.onnx").use { input ->
+                    modelFile.outputStream().use { output ->
+                        input.copyTo(output)
+                    }
+                }
+                
+                val env = OrtEnvironment.getEnvironment()
+                ortSession = env.createSession(modelFile.absolutePath)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+    
+    private fun setupUI() {
+        binding.synthesizeButton.setOnClickListener {
+            // Hier kommt Ihre TTS-Logik hin
+        }
+    }
+}""")
+
+    # activity_main.xml
+    with open("app/src/main/res/layout/activity_main.xml", "w") as f:
+        f.write("""<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/textInputLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Text für Synthese"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/inputText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textMultiLine"
+            android:lines="3" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/synthesizeButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Synthesieren"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textInputLayout" />
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>""")
+
+    # AndroidManifest.xml
+    with open("app/src/main/AndroidManifest.xml", "w") as f:
+        f.write("""<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.MaterialComponents.DayNight.DarkActionBar">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>""")
+
+    # strings.xml
+    with open("app/src/main/res/values/strings.xml", "w") as f:
+        f.write("""<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TTS App</string>
+</resources>""")
+
+    # Gradle Wrapper Properties
+    with open("gradle/wrapper/gradle-wrapper.properties", "w") as f:
+        f.write("""distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+distributionUrl=https\://services.gradle.org/distributions/gradle-7.6.1-bin.zip
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists""")
+
+def main():
+    """Hauptfunktion zum Erstellen des Projekts"""
+    print("🚀 Erstelle Android-Projekt...")
+    create_project_structure()
+    print("✅ Projekt-Struktur erstellt!")
+    
+    print("\n📝 Folgende Schritte sind noch notwendig:")
+    print("1. Kopieren Sie Ihr ONNX-Modell nach app/src/main/assets/models/tts_model.onnx")
+    print("2. Setzen Sie den korrekten SDK-Pfad in local.properties")
+    print("3. Führen Sie ./gradlew build aus, um das Projekt zu kompilieren")
+    print("\n🎉 Fertig! Das Projekt ist nun bereit für die Entwicklung!")
+
+if __name__ == "__main__":
+    main()
+-e 
+build-info ./setup3.py:
+
+#!/usr/bin/env python3
+
+def quick_fix():
+    """Fixe die AndroidX Probleme mit minimalen Änderungen"""
+    
+    # Erstelle gradle.properties falls nicht vorhanden
+    with open("gradle.properties", "w") as f:
+        f.write("android.useAndroidX=true\nandroid.enableJetifier=true")
+    
+    print("✅ Fixes angewendet - führen Sie nun ./gradlew build aus")
+
+if __name__ == "__main__":
+    quick_fix()
+-e 
+build-info ./app/src/main/res/values/strings.xml:
+
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TTS App</string>
+</resources>-e 
+build-info ./app/src/main/res/layout/activity_main.xml:
+
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/modelStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Kein Modell geladen"
+        android:textStyle="italic"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/textInputLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:hint="Text für Synthese"
+        app:layout_constraintTop_toBottomOf="@id/modelStatus">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/inputText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textMultiLine"
+            android:lines="3" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/loadModelButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Anderes Modell laden"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textInputLayout" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/synthesizeButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Synthesieren"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/loadModelButton" />
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>-e 
+build-info ./app/src/main/java/com/example/ttsapp/MainActivity.kt:
+
+package com.example.ttsapp
+
+import android.os.Bundle
+import android.view.View
+import androidx.appcompat.app.AppCompatActivity
+import com.example.ttsapp.databinding.ActivityMainBinding
+
+class MainActivity : AppCompatActivity() {
+    private var _binding: ActivityMainBinding? = null
+    private val binding get() = _binding!!
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        _binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        
+        // Minimale UI Initialisierung
+        binding.synthesizeButton.isEnabled = false
+        binding.progressBar.visibility = View.GONE
+        binding.modelStatus.text = "Kein Modell geladen"
+        
+        // Einfacher Click Listener
+        binding.loadModelButton.setOnClickListener {
+            binding.modelStatus.text = "Button wurde geklickt"
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        _binding = null
+    }
+}
+-e 
+build-info ./app/src/main/AndroidManifest.xml:
+
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.MaterialComponents.DayNight.DarkActionBar">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>-e 
+build-info ./gradle/wrapper/gradle-wrapper.properties:
+
+distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+distributionUrl=https\://services.gradle.org/distributions/gradle-8.10.2-bin.zip
+networkTimeout=10000
+validateDistributionUrl=true
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+-e 
+build-info ./fix11.py:
+
+#!/usr/bin/env python3
+
+def fix_loader():
+    """Korrigiert den loadExternalModel Call"""
+    
+    with open("app/src/main/java/com/example/ttsapp/MainActivity.kt", "r") as f:
+        content = f.read()
+
+    # Ersetze die problematische Methode
+    content = content.replace(
+        """    private fun loadExternalModel(uri: Uri) {
+        updateUIState(isLoading = true)
+
+        lifecycleScope.launch(Dispatchers.IO) {""",
+        """    private fun loadExternalModel(uri: Uri) {
+        lifecycleScope.launch(Dispatchers.IO) {
+            updateUIState(isLoading = true)""")
+
+    with open("app/src/main/java/com/example/ttsapp/MainActivity.kt", "w") as f:
+        f.write(content)
+
+    print("✅ Loader-Methode korrigiert")
+
+if __name__ == "__main__":
+    fix_loader()
+-e 
+build-info ./setup4.py:
+
+#!/usr/bin/env python3
+import os
+
+def create_icons():
+    """Erstellt einfache App-Icons"""
+    
+    # Verzeichnisse erstellen
+    for dpi in ['mdpi', 'hdpi', 'xhdpi', 'xxhdpi', 'xxxhdpi']:
+        path = f"app/src/main/res/mipmap-{dpi}"
+        os.makedirs(path, exist_ok=True)
+        
+        # Platzhalter-Icon erstellen
+        for icon_name in ['ic_launcher', 'ic_launcher_round']:
+            with open(f"{path}/{icon_name}.png", "wb") as f:
+                # Ein 1x1 transparentes PNG
+                f.write(b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15\xc4\x89\x00\x00\x00\x0bIDAT\x08\xd7c\x60\x60\x00\x00\x00\x02\x00\x01\xe5\x27\xde\xfc\x00\x00\x00\x00IEND\xaeB`\x82')
+
+    print("✅ Icons erstellt")
+
+if __name__ == "__main__":
+    create_icons()
+-e 
+build-info ./fix3.py:
+
+#!/usr/bin/env python3
+
+def create_file_chooser():
+    content = """package com.example.ttsapp
+
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Bundle
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
+import com.example.ttsapp.databinding.ActivityMainBinding
+import ai.onnxruntime.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
+class MainActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityMainBinding
+    private var ortSession: OrtSession? = null
+    private var isProcessing = false
+
+    private val getContent = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri?.let { loadModel(it) }
+    }
+    
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        
+        setupListeners()
+        checkPermission()
+    }
+
+    private fun checkPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+            != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
+                1)
+        }
+    }
+
+    private fun loadModel(uri: Uri) {
+        binding.synthesizeButton.isEnabled = false
+        binding.loadModelButton.isEnabled = false
+        binding.progressBar.visibility = android.view.View.VISIBLE
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val modelBytes = contentResolver.openInputStream(uri)?.use { it.readBytes() }
+                    ?: throw Exception("Konnte Modelldatei nicht lesen")
+
+                val env = OrtEnvironment.getEnvironment()
+                ortSession = env.createSession(modelBytes)
+
+                withContext(Dispatchers.Main) {
+                    binding.synthesizeButton.isEnabled = true
+                    binding.loadModelButton.isEnabled = true
+                    binding.progressBar.visibility = android.view.View.GONE
+                    Toast.makeText(this@MainActivity, "Model erfolgreich geladen", Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    binding.loadModelButton.isEnabled = true
+                    binding.progressBar.visibility = android.view.View.GONE
+                    Toast.makeText(this@MainActivity, 
+                        "Modelladung fehlgeschlagen: ${e.message}", 
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+        }
+    }
+    
+    private fun setupListeners() {
+        binding.synthesizeButton.isEnabled = false
+        
+        binding.loadModelButton.setOnClickListener {
+            getContent.launch("application/octet-stream")
+        }
+        
+        binding.synthesizeButton.setOnClickListener {
+            if (!isProcessing) {
+                val text = binding.inputText.text?.toString() ?: ""
+                if (text.isNotEmpty()) {
+                    synthesizeText(text)
+                } else {
+                    Toast.makeText(this, "Bitte Text eingeben", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    private fun synthesizeText(text: String) {
+        isProcessing = true
+        binding.progressBar.visibility = android.view.View.VISIBLE
+        binding.synthesizeButton.isEnabled = false
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val session = ortSession ?: throw Exception("Model nicht geladen")
+                
+                val inputArray = arrayOf(text)
+                val env = OrtEnvironment.getEnvironment()
+                val input = OnnxTensor.createTensor(env, inputArray)
+                
+                val output = session.run(mapOf("text" to input))
+                val audioData = output[0].value as Array<*>
+
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@MainActivity, 
+                        "Audio generiert (${audioData.size} samples)", 
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@MainActivity, 
+                        "Fehler: ${e.message}", 
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            } finally {
+                withContext(Dispatchers.Main) {
+                    binding.progressBar.visibility = android.view.View.GONE
+                    binding.synthesizeButton.isEnabled = true
+                    isProcessing = false
+                }
+            }
+        }
+    }
+}"""
+
+    # Layout Update
+    layout = """<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/textInputLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Text für Synthese"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/inputText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textMultiLine"
+            android:lines="3" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/loadModelButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Modell laden"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textInputLayout" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/synthesizeButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Synthesieren"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/loadModelButton" />
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>"""
+
+    # Update AndroidManifest to include storage permission
+    manifest = """<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.MaterialComponents.DayNight.DarkActionBar">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>"""
+
+    # Write files
+    with open("app/src/main/java/com/example/ttsapp/MainActivity.kt", "w") as f:
+        f.write(content)
+    
+    with open("app/src/main/res/layout/activity_main.xml", "w") as f:
+        f.write(layout)
+        
+    with open("app/src/main/AndroidManifest.xml", "w") as f:
+        f.write(manifest)
+    
+    print("✅ File Chooser Implementation hinzugefügt")
+
+if __name__ == "__main__":
+    create_file_chooser()
+-e 
+build-info ./local.properties:
+
+sdk.dir=/path/to/your/android/sdk-e 
+build-info ./fix10.py:
+
+#!/usr/bin/env python3
+
+def fix_main_activity():
+    """Korrigiert die Fehler in der MainActivity.kt"""
+    
+    with open("app/src/main/java/com/example/ttsapp/MainActivity.kt", "r") as f:
+        content = f.read()
+
+    # 1. BUFFER_SIZE aus companion object raus
+    content = content.replace(
+        """companion object {
+        private const val SAMPLE_RATE = 22050 // Standard TTS sample rate
+        private const val PERMISSION_REQUEST_CODE = 1001
+        private const val BUFFER_SIZE = AudioTrack.getMinBufferSize(
+            SAMPLE_RATE,
+            AudioFormat.CHANNEL_OUT_MONO,
+            AudioFormat.ENCODING_PCM_FLOAT
+        )
+    }""",
+        """companion object {
+        private const val SAMPLE_RATE = 22050 // Standard TTS sample rate
+        private const val PERMISSION_REQUEST_CODE = 1001
+    }
+
+    private val BUFFER_SIZE = AudioTrack.getMinBufferSize(
+        SAMPLE_RATE,
+        AudioFormat.CHANNEL_OUT_MONO,
+        AudioFormat.ENCODING_PCM_FLOAT
+    )""")
+
+    # 2. setupListeners Coroutine Fix
+    content = content.replace(
+        """binding.synthesizeButton.setOnClickListener {
+            if (!isProcessing) {
+                val text = binding.inputText.text?.toString() ?: ""
+                if (text.isNotEmpty()) {
+                    synthesizeText(text)
+                } else {
+                    showToast("Bitte Text eingeben")
+                }
+            }
+        }""",
+        """binding.synthesizeButton.setOnClickListener {
+            if (!isProcessing) {
+                val text = binding.inputText.text?.toString() ?: ""
+                if (text.isNotEmpty()) {
+                    synthesizeText(text)
+                } else {
+                    lifecycleScope.launch {
+                        showToast("Bitte Text eingeben")
+                    }
+                }
+            }
+        }""")
+
+    with open("app/src/main/java/com/example/ttsapp/MainActivity.kt", "w") as f:
+        f.write(content)
+
+    print("✅ MainActivity.kt Fehler behoben")
+
+if __name__ == "__main__":
+    fix_main_activity()
+-e 
+build-info ./gradle.properties:
+
+android.useAndroidX=true
+android.enableJetifier=true-e 
+build-info ./output.txt:
+
+-e 
+build-info ./.GitHub/workflows/ci.yml:
+
+name: Build APK for Examples #1
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      ANDROIDSDK: "$HOME/android-sdk"
+      ANDROIDNDK: "$HOME/.buildozer/android/platform/android-ndk-r25c"
+      ANDROIDAPI: "30"
+      ANDROIDMINAPI: "24"
+      PACKAGES_PATH: "$HOME/.buildozer/android/packages"
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+
+      - name: Set up JDK 8
+        uses: actions/setup-java@v2
+        with:
+          java-version: '8'
+          distribution: 'temurin'
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git zip unzip python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev gradlew openjdk-8-jre-headless libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev python3-distutils
+          python -m pip install --upgrade pip
+          python -m pip install --user --upgrade Cython==0.29.33 virtualenv
+          python -m pip install --user buildozer
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          
+      - name: Setup Android environment
+        run: |
+          mkdir -p $HOME/android-sdk
+          echo "ANDROIDSDK=$HOME/android-sdk" >> $GITHUB_ENV
+          echo "ANDROIDNDK=$HOME/.buildozer/android/platform/android-ndk-r25c" >> $GITHUB_ENV
+          echo "ANDROIDAPI=30" >> $GITHUB_ENV
+          echo "ANDROIDMINAPI=24" >> $GITHUB_ENV
+          echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
+          echo "PATH=$PATH:$HOME/android-sdk/cmdline-tools/latest/bin:$HOME/android-sdk/platform-tools" >> $GITHUB_ENV
+          cd $HOME/android-sdk
+          wget https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip
+          unzip commandlinetools-linux-7583922_latest.zip
+          mkdir -p cmdline-tools/latest
+          mv cmdline-tools/* cmdline-tools/latest/ || true
+          rm -rf cmdline-tools/latest/cmdline-tools
+          echo "Android command line tools setup completed"
+          yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses
+          $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-30" "build-tools;30.0.3"
+          echo "Android SDK components installation completed"
+          
+      - name: Install NDK
+        run: |
+          mkdir -p $HOME/.buildozer/android/platform/
+          wget https://dl.google.com/android/repository/android-ndk-r25c-linux.zip
+          unzip android-ndk-r25c-linux.zip
+          mv android-ndk-r25c $HOME/.buildozer/android/platform/android-ndk-r25c
+          echo "Android NDK installation completed"
+          
+      - name: Setup build environment
+        run: |
+          mkdir -p $HOME/.buildozer/android/platform
+          ln -s $HOME/android-sdk $HOME/.buildozer/android/platform/android-sdk
+          mkdir -p $HOME/.buildozer/android/packages
+          echo "Build environment setup completed"
+          
+      - name: Cache Buildozer dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.buildozer
+            ~/.gradle
+          key: ${{ runner.os }}-buildozer-${{ hashFiles('**/*.spec', '**/build.gradle') }}
+          restore-keys: |
+            ${{ runner.os }}-buildozer-
+            
+      - name: Build APK
+        run: |
+          echo "Starting APK build..."
+          # Hauptbuild mit Filterung
+          gradle wrapper
+          ./gradlew assembleDebug
+          # Prüfen ob der Build erfolgreich war
+          #if [ -f "bin/"*.apk ]; then
+          #  echo "Build successful - APK created"
+          #else
+          #  echo "Build failed - No APK found"
+          #  exit 1
+          #fi
+          #echo "APK build process completed"
+          #find ~ -name "*.apk*"
+          #ls -R app | grep -v abb/build
+          cp app/build/outputs/apk/debug/app-debug.apk ~/tts-native-debug.apk
+      - name: Upload APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: tts-native-debug.apk
+          path: /home/runner/tts-native-debug.apk
+          if-no-files-found: error
+
+      - name: Debug environment
+        run: |
+          echo "ANDROIDSDK: $ANDROIDSDK"
+          echo "ANDROIDNDK: $ANDROIDNDK"
+          echo "PATH: $PATH"
+-e 
+build-info ./.GitHub/workflow/ci.yml:
+
+name: Build APK for Examples #1
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      ANDROIDSDK: "$HOME/android-sdk"
+      ANDROIDNDK: "$HOME/.buildozer/android/platform/android-ndk-r25c"
+      ANDROIDAPI: "30"
+      ANDROIDMINAPI: "24"
+      PACKAGES_PATH: "$HOME/.buildozer/android/packages"
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+
+      - name: Set up JDK 8
+        uses: actions/setup-java@v2
+        with:
+          java-version: '8'
+          distribution: 'temurin'
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git zip unzip python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev gradlew openjdk-8-jre-headless libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev python3-distutils
+          python -m pip install --upgrade pip
+          python -m pip install --user --upgrade Cython==0.29.33 virtualenv
+          python -m pip install --user buildozer
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          
+      - name: Setup Android environment
+        run: |
+          mkdir -p $HOME/android-sdk
+          echo "ANDROIDSDK=$HOME/android-sdk" >> $GITHUB_ENV
+          echo "ANDROIDNDK=$HOME/.buildozer/android/platform/android-ndk-r25c" >> $GITHUB_ENV
+          echo "ANDROIDAPI=30" >> $GITHUB_ENV
+          echo "ANDROIDMINAPI=24" >> $GITHUB_ENV
+          echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
+          echo "PATH=$PATH:$HOME/android-sdk/cmdline-tools/latest/bin:$HOME/android-sdk/platform-tools" >> $GITHUB_ENV
+          cd $HOME/android-sdk
+          wget https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip
+          unzip commandlinetools-linux-7583922_latest.zip
+          mkdir -p cmdline-tools/latest
+          mv cmdline-tools/* cmdline-tools/latest/ || true
+          rm -rf cmdline-tools/latest/cmdline-tools
+          echo "Android command line tools setup completed"
+          yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses
+          $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-30" "build-tools;30.0.3"
+          echo "Android SDK components installation completed"
+          
+      - name: Install NDK
+        run: |
+          mkdir -p $HOME/.buildozer/android/platform/
+          wget https://dl.google.com/android/repository/android-ndk-r25c-linux.zip
+          unzip android-ndk-r25c-linux.zip
+          mv android-ndk-r25c $HOME/.buildozer/android/platform/android-ndk-r25c
+          echo "Android NDK installation completed"
+          
+      - name: Setup build environment
+        run: |
+          mkdir -p $HOME/.buildozer/android/platform
+          ln -s $HOME/android-sdk $HOME/.buildozer/android/platform/android-sdk
+          mkdir -p $HOME/.buildozer/android/packages
+          echo "Build environment setup completed"
+          
+      - name: Cache Buildozer dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.buildozer
+            ~/.gradle
+          key: ${{ runner.os }}-buildozer-${{ hashFiles('**/*.spec', '**/build.gradle') }}
+          restore-keys: |
+            ${{ runner.os }}-buildozer-
+            
+      - name: Build APK
+        run: |
+          echo "Starting APK build..."
+          # Hauptbuild mit Filterung
+          gradle wrapper
+          ./gradlew assembleDebug
+          # Prüfen ob der Build erfolgreich war
+          #if [ -f "bin/"*.apk ]; then
+          #  echo "Build successful - APK created"
+          #else
+          #  echo "Build failed - No APK found"
+          #  exit 1
+          #fi
+          #echo "APK build process completed"
+          #find ~ -name "*.apk*"
+          #ls -R app | grep -v abb/build
+          cp app/build/outputs/apk/debug/app-debug.apk ~/tts-native-debug.apk
+      - name: Upload APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: tts-native-debug.apk
+          path: /home/runner/tts-native-debug.apk
+          if-no-files-found: error
+
+      - name: Debug environment
+        run: |
+          echo "ANDROIDSDK: $ANDROIDSDK"
+          echo "ANDROIDNDK: $ANDROIDNDK"
+          echo "PATH: $PATH"
+-e 
+build-info ./fix9.py:
+
+#!/usr/bin/env python3
+import os
+import zipfile
+
+def check_apk():
+    """Überprüft den Inhalt der APK"""
+    apk_path = "app/build/outputs/apk/debug/app-debug.apk"
+    
+    with zipfile.ZipFile(apk_path) as apk:
+        files = apk.namelist()
+        onnx_files = [f for f in files if f.endswith('.onnx')]
+        
+        print("Gefundene ONNX Dateien:")
+        for f in onnx_files:
+            info = apk.getinfo(f)
+            original = info.file_size
+            compressed = info.compress_size
+            print(f"{f}: {original/1024/1024:.1f}MB (komprimiert: {compressed/1024/1024:.1f}MB)")
+
+if __name__ == "__main__":
+    check_apk()
+-e 
+build-info ./fix2.py:
+
+#!/usr/bin/env python3
+
+def fix_main_activity():
+    """Korrigiert den Input-Namen für das ONNX Modell"""
+    
+    with open("app/src/main/java/com/example/ttsapp/MainActivity.kt", "r") as f:
+        content = f.read()
+    
+    # Ersetze den falschen Input-Namen
+    content = content.replace(
+        """val input = OnnxTensor.createTensor(OrtEnvironment.getEnvironment(), inputTensor, shape)
+                
+                val output = session.run(mapOf("input" to input))""",
+        """val input = OnnxTensor.createTensor(OrtEnvironment.getEnvironment(), inputTensor, shape)
+                
+                val output = session.run(mapOf("text" to input))"""
+    )
+    
+    with open("app/src/main/java/com/example/ttsapp/MainActivity.kt", "w") as f:
+        f.write(content)
+    
+    print("✅ Input Name korrigiert")
+
+if __name__ == "__main__":
+    fix_main_activity()
+-e 
+build-info ./fix8.py:
+
+// app/build.gradle
+android {
+    // ... andere Konfigurationen bleiben gleich ...
+
+    sourceSets {
+        main {
+            assets {
+                srcDirs = ['src/main/assets']
+                aaptOptions {
+                    noCompress 'onnx'  // Verhindert Kompression der ONNX Dateien
+                }
+            }
+        }
+    }
+}
+-e 
+build-info ./setup2.py:
+
+#!/usr/bin/env python3
+import os
+import shutil
+import argparse
+from pathlib import Path
+import subprocess
+from typing import Optional
+
+class AndroidProjectManager:
+    def __init__(self, project_name: str = "TtsApp", package_name: str = "com.example.ttsapp"):
+        self.project_name = project_name
+        self.package_name = package_name
+        self.package_path = package_name.replace(".", "/")
+        self.root_dir = Path.cwd()
+
+    def setup_project(self, model_path: Optional[str] = None):
+        """Hauptmethode zum Einrichten oder Aktualisieren des Projekts"""
+        print("🚀 Starte Projekt-Setup/Update...")
+        
+        # Erstelle/Update Projektstruktur
+        self._ensure_directories()
+        self._write_gradle_files()
+        self._write_manifest()
+        self._write_main_activity()
+        self._write_layout()
+        
+        # Modell-Handling
+        if model_path:
+            self.copy_model(model_path)
+        
+        # Gradle Wrapper erstellen falls nicht vorhanden
+        self._ensure_gradle_wrapper()
+        
+        print("✅ Setup/Update abgeschlossen!")
+        self._print_next_steps(model_path is None)
+
+    def _ensure_directories(self):
+        """Erstellt benötigte Verzeichnisse"""
+        dirs = [
+            f"app/src/main/java/{self.package_path}",
+            "app/src/main/res/layout",
+            "app/src/main/res/values",
+            "app/src/main/assets/models",
+            "gradle/wrapper"
+        ]
+        for dir_path in dirs:
+            Path(dir_path).mkdir(parents=True, exist_ok=True)
+
+    def copy_model(self, model_path: str):
+        """Kopiert ONNX Modell in assets"""
+        if not os.path.exists(model_path):
+            print(f"⚠️  Modell nicht gefunden: {model_path}")
+            return False
+            
+        target_path = "app/src/main/assets/models/tts_model.onnx"
+        shutil.copy2(model_path, target_path)
+        print(f"✅ Modell kopiert nach {target_path}")
+        return True
+
+    def _write_gradle_files(self):
+        """Schreibt alle Gradle-Konfigurationsdateien"""
+        # gradle.properties
+        with open("gradle.properties", "w") as f:
+            f.write("""org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
+android.useAndroidX=true
+android.enableJetifier=true
+kotlin.code.style=official
+android.nonTransitiveRClass=true""")
+
+        # settings.gradle
+        with open("settings.gradle", "w") as f:
+            f.write(f"""include ':app'
+rootProject.name = "{self.project_name}"
+""")
+
+        # build.gradle (Project)
+        with open("build.gradle", "w") as f:
+            f.write("""buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:7.4.2'
+        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.22'
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}""")
+
+        # build.gradle (App)
+        with open("app/build.gradle", "w") as f:
+            f.write(f"""plugins {{
+    id 'com.android.application'
+    id 'kotlin-android'
+}}
+
+android {{
+    namespace '{self.package_name}'
+    compileSdk 33
+
+    defaultConfig {{
+        applicationId "{self.package_name}"
+        minSdk 21
+        targetSdk 33
+        versionCode 1
+        versionName "1.0"
+
+        ndk {{
+            abiFilters 'armeabi-v7a', 'arm64-v8a'
+        }}
+    }}
+
+    buildTypes {{
+        release {{
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }}
+    }}
+
+    buildFeatures {{
+        viewBinding true
+    }}
+
+    compileOptions {{
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }}
+
+    kotlinOptions {{
+        jvmTarget = '1.8'
+    }}
+}}
+
+dependencies {{
+    implementation 'androidx.core:core-ktx:1.10.1'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.9.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'com.microsoft.onnxruntime:onnxruntime-android:1.15.1'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1'
+}}""")
+
+    def _write_manifest(self):
+        """Schreibt Android Manifest"""
+        with open("app/src/main/AndroidManifest.xml", "w") as f:
+            f.write(f"""<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/Theme.MaterialComponents.DayNight.DarkActionBar">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>""")
+
+    def _ensure_gradle_wrapper(self):
+        """Stellt sicher dass Gradle Wrapper existiert"""
+        if not os.path.exists("gradlew"):
+            try:
+                subprocess.run(["gradle", "wrapper"], check=True)
+                print("✅ Gradle Wrapper erstellt")
+            except Exception as e:
+                print(f"⚠️  Konnte Gradle Wrapper nicht erstellen: {e}")
+
+    def _print_next_steps(self, needs_model: bool):
+        """Zeigt nächste Schritte an"""
+        print("\n📝 Nächste Schritte:")
+        if needs_model:
+            print("1. Führen Sie das Script erneut mit --model PFAD/ZU/MODELL.onnx aus")
+        print("2. Führen Sie ./gradlew build aus")
+        print("3. Öffnen Sie das Projekt in Android Studio oder bauen Sie mit ./gradlew assembleDebug")
+
+def main():
+    parser = argparse.ArgumentParser(description='Android Projekt Setup/Update Tool')
+    parser.add_argument('--name', default='TtsApp', help='Projektname')
+    parser.add_argument('--package', default='com.example.ttsapp', help='Package Name')
+    parser.add_argument('--model', help='Pfad zum ONNX Modell')
+    
+    args = parser.parse_args()
+    
+    manager = AndroidProjectManager(args.name, args.package)
+    manager.setup_project(args.model)
+
+if __name__ == "__main__":
+    main()
+-e 
+build-info ./fix12.py:
+
+#!/usr/bin/env python3
+
+def fix_loader_complete():
+    with open("app/src/main/java/com/example/ttsapp/MainActivity.kt", "r") as f:
+        content = f.read()
+    
+    # Finde und ersetze die loadExternalModel Funktion
+    old_function = """    private fun loadExternalModel(uri: Uri) {
+        lifecycleScope.launch(Dispatchers.IO) {
+            updateUIState(isLoading = true)
+
+            try {
+                val modelBytes = contentResolver.openInputStream(uri)?.use { it.readBytes() }
+                    ?: throw Exception("Konnte Modelldatei nicht lesen")
+
+                loadModelFromBytes(modelBytes)
+                updateModelStatus("Externes Modell aktiv")
+            } catch (e: Exception) {
+                showToast("Modelladung fehlgeschlagen: ${e.message}")
+            } finally {
+                updateUIState(isLoading = false)
+            }
+        }
+    }"""
+
+    new_function = """    private fun loadExternalModel(uri: Uri) {
+        lifecycleScope.launch {
+            withContext(Dispatchers.Main) {
+                binding.synthesizeButton.isEnabled = false
+                binding.loadModelButton.isEnabled = false
+                binding.progressBar.visibility = android.view.View.VISIBLE
+            }
+
+            try {
+                withContext(Dispatchers.IO) {
+                    val modelBytes = contentResolver.openInputStream(uri)?.use { it.readBytes() }
+                        ?: throw Exception("Konnte Modelldatei nicht lesen")
+                    loadModelFromBytes(modelBytes)
+                }
+                updateModelStatus("Externes Modell aktiv")
+            } catch (e: Exception) {
+                showToast("Modelladung fehlgeschlagen: ${e.message}")
+            } finally {
+                withContext(Dispatchers.Main) {
+                    binding.loadModelButton.isEnabled = true
+                    binding.progressBar.visibility = android.view.View.GONE
+                }
+            }
+        }
+    }"""
+
+    content = content.replace(old_function, new_function)
+    
+    with open("app/src/main/java/com/example/ttsapp/MainActivity.kt", "w") as f:
+        f.write(content)
+    
+    print("✅ loadExternalModel komplett überarbeitet")
+
+if __name__ == "__main__":
+    fix_loader_complete()
+-e 
+build-info ./build.gradle:
+
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:7.4.2'
+        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.22'
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
