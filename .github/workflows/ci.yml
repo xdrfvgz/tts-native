@@ -91,7 +91,7 @@ jobs:
           echo "Starting APK build..."
           # Hauptbuild mit Filterung
           gradle wrapper --stacktrace
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug --stacktrace 
           # Prüfen ob der Build erfolgreich war
           #if [ -f "bin/"*.apk ]; then
           #  echo "Build successful - APK created"
