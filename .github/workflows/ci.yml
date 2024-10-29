@@ -26,10 +26,10 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: Set up JDK 17
+      - name: Set up JDK 8
         uses: actions/setup-java@v2
         with:
-          java-version: '17'
+          java-version: '8'
           distribution: 'temurin'
 
       - name: Install dependencies
@@ -91,6 +91,7 @@ jobs:
           echo "Starting APK build..."
           # Hauptbuild mit Filterung
           gradle wrapper --stacktrace
+          java -version
           rm -rf ~/.gradle/caches/
           ./gradlew assembleDebug --stacktrace --debug
           # Prüfen ob der Build erfolgreich war
